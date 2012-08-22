@@ -9,20 +9,15 @@
 	</parent>
 	<artifactId>randi3-method-block</artifactId>
 	<version>0.1-SNAPSHOT</version>
-	<name>${project.artifactId}</name>
-	<description>My wonderfull scala app</description>
-	<inceptionYear>2010</inceptionYear>
+	  <name>RANDI2 - block randomization method</name> 
+    	<description>Block randomization method</description> 
+  	  <url>http://randi2.org</url>
 
-	<dependencies>
-		<dependency>
-			<groupId>org.randi3</groupId>
-			<artifactId>randi3-core</artifactId>
-			<version>0.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-math3</artifactId>
-			<version>3.0</version>
-		</dependency>
-	</dependencies>
+  	 <licenses>
+		<license>
+			<name>GNU GENERAL PUBLIC LICENSE Version 3</name>
+			<url>http://www.gnu.org/licenses/gpl-3.0-standalone.html</url>
+		</license>
+	</licenses>
+
 </project>

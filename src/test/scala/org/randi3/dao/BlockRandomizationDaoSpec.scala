@@ -1,6 +1,6 @@
 package org.randi3.method.block
 import java.util.Date
-import org.apache.commons.math.random.MersenneTwister
+import org.apache.commons.math3.random.MersenneTwister
 
 import org.junit.runner.RunWith
 import org.randi3.randomization.BlockRandomization

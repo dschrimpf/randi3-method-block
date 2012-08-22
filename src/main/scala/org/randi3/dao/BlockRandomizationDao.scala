@@ -1,10 +1,8 @@
 package org.randi3.dao
 
-import org.randi3.schema.DatabaseSchema._
-
 import org.randi3.schema.BlockRandomizationSchema._
 
-import org.scalaquery.session.Database
+import org.randi3.schema.DatabaseSchema._
 import org.scalaquery.session._
 import org.scalaquery.session.Database.threadLocalSession
 import org.scalaquery.ql._

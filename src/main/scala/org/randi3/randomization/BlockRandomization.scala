@@ -2,7 +2,7 @@ package org.randi3.randomization
 
 import org.randi3.model._
 import org.randi3.randomization._
-import org.apache.commons.math.random._
+import org.apache.commons.math3.random._
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.ListBuffer
 

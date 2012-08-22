@@ -12,7 +12,7 @@ import org.scalaquery.ql.extended.ExtendedProfile
 import org.scalaquery.session.Database
 import scalaz._
 
-import org.apache.commons.math.random._
+import org.apache.commons.math3.random._
 
 import org.randi3.schema.BlockRandomizationSchema._
 
