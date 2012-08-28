@@ -19,8 +19,9 @@ class BlockRandomization(val id: Int = Int.MinValue, val version: Int = 0, val r
 
   private def generateBlock(trial: Trial, subject: TrialSubject) {
     val stratum = subject.getStratum
-    val block  = blocks.get(stratum).getOrElse{ 
-      blocks.put(stratum, new ListBuffer()).get
+    val block  = blocks.get(stratum).getOrElse{
+      blocks.put(stratum, new ListBuffer())
+      blocks.get(stratum).get
     }
     if (!block.isEmpty) return
 
