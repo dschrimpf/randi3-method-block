@@ -18,7 +18,7 @@ class BlockRandomization(val id: Int = Int.MinValue, val version: Int = 0, val r
   }
 
   private def generateBlock(trial: Trial, subject: TrialSubject) {
-    val stratum = subject.getStratum
+    val stratum = subject.getStratum(trial.stratifyTrialSite)
     val block  = blocks.get(stratum).getOrElse{
       blocks.put(stratum, new ListBuffer())
       blocks.get(stratum).get
@@ -37,7 +37,7 @@ class BlockRandomization(val id: Int = Int.MinValue, val version: Int = 0, val r
   }
 
   private def pullFromBlock(trial: Trial, subject: TrialSubject): TreatmentArm = {
-    val stratum = subject.getStratum
+    val stratum = subject.getStratum(trial.stratifyTrialSite)
     val block = blocks.get(stratum).getOrElse{ 
      generateBlock(trial, subject)
      blocks.get(stratum).get
