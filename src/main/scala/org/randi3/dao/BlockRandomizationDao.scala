@@ -105,6 +105,16 @@ class BlockRandomizationDao(database: Database, driver: ExtendedProfile) extends
   }
 
   def delete(randomizationMethod: BlockRandomization) {
+    database withSession {
+      queryBlockRandomizationFromId(randomizationMethod.id).mutate { r =>
+        r.delete()
+      }
+
+      queryRandomizationMethodFromId(randomizationMethod.id).mutate { r =>
+        r.delete()
+      }
+
+    }
 
   }
 
