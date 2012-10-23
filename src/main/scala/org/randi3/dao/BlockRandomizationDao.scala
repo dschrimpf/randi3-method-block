@@ -9,46 +9,53 @@ import org.scalaquery.ql._
 import org.scalaquery.ql.TypeMapper._
 import org.scalaquery.ql.extended.ExtendedProfile
 
-import org.randi3.randomization.BlockRandomization
+import org.randi3.randomization.{VariableBlockRandomization, AbstractBlockRandomization, BlockRandomization}
 import scala.collection.mutable.ListBuffer
 import scalaz._
 
 class BlockRandomizationDao(database: Database, driver: ExtendedProfile) extends AbstractRandomizationMethodDao(database, driver) {
+
   import driver.Implicit._
 
   private val queryBlockRandomizationFromId = for {
     id <- Parameters[Int]
     blockRandomization <- BlockRandomizations if blockRandomization.randomizationMethodId is id
-  } yield blockRandomization.id ~ blockRandomization.version ~ blockRandomization.randomizationMethodId ~ blockRandomization.blocksize
+  } yield blockRandomization.id ~ blockRandomization.version ~ blockRandomization.randomizationMethodId ~ blockRandomization.blocksize ~ blockRandomization.minBlockSize ~ blockRandomization.maxBlockSize ~blockRandomization.variableBlockType
 
   private val queryBlocksFromId = for {
     id <- Parameters[Int]
     blocks <- Blocks if blocks.randomizationMethodId is id
   } yield blocks.id ~ blocks.treatmentArmId ~ blocks.stratum
 
-  def create(randomizationMethod: BlockRandomization, trialId: Int): Validation[String, Int] = {
+  def create(randomizationMethod: AbstractBlockRandomization, trialId: Int): Validation[String, Int] = {
     database withSession {
       val identifier =
         threadLocalSession withTransaction {
-          RandomizationMethods.noId insert (trialId, generateBlob(randomizationMethod.random), randomizationMethod.getClass().getName())
+          RandomizationMethods.noId insert(trialId, generateBlob(randomizationMethod.random), randomizationMethod.getClass().getName())
           val id = getId(trialId).either match {
             case Left(x) => return Failure(x)
             case Right(id1) => id1
           }
-          BlockRandomizations.noId insert (0, id, randomizationMethod.blocksize)
+          if (randomizationMethod.isInstanceOf[BlockRandomization]) {
+            BlockRandomizations.noId insert(0, id, Some(randomizationMethod.asInstanceOf[BlockRandomization].blocksize), None, None, None)
+          }else  if (randomizationMethod.isInstanceOf[VariableBlockRandomization]) {
+            val method = randomizationMethod.asInstanceOf[VariableBlockRandomization]
+            BlockRandomizations.noId insert(0, id, None, Some(method.minBlockSize), Some(method.maxBlockSize), Some(method.variableBlockRandomizationType.toString))
+          }
+
           id
         }
       Success(identifier)
     }
   }
 
-  def get(id: Int): Validation[String, Option[BlockRandomization]] = {
+  def get(id: Int): Validation[String, Option[AbstractBlockRandomization]] = {
     database withSession {
       val resultList = queryRandomizationMethodFromId(id).list
       if (resultList.isEmpty) Success(None)
       else if (resultList.size == 1) {
         val rm = resultList(0)
-        if (rm._3 == classOf[BlockRandomization].getName()) {
+        if (rm._3 == classOf[BlockRandomization].getName) {
           val blockSize = getBlockSize(id).either match {
             case Left(x) => return Failure(x)
             case Right(blocksize) => blocksize
@@ -63,13 +70,13 @@ class BlockRandomizationDao(database: Database, driver: ExtendedProfile) extends
     }
   }
 
-  def getFromTrialId(trialId: Int): Validation[String, Option[BlockRandomization]] = {
+  def getFromTrialId(trialId: Int): Validation[String, Option[AbstractBlockRandomization]] = {
     database withSession {
       val resultList = queryRandomizationMethodFromTrialId(trialId).list
       if (resultList.isEmpty) Success(None)
       else if (resultList.size == 1) {
         val rm = resultList(0)
-        if (rm._4 == classOf[BlockRandomization].getName()) {
+        if (rm._4 == classOf[BlockRandomization].getName) {
           val blockSize = getBlockSize(rm._1.get).either match {
             case Left(x) => return Failure(x)
             case Right(blocksize) => blocksize
@@ -84,15 +91,26 @@ class BlockRandomizationDao(database: Database, driver: ExtendedProfile) extends
     }
   }
 
-  def update(randomizationMethod: BlockRandomization): Validation[String, BlockRandomization] = {
+  def update(randomizationMethod: AbstractBlockRandomization): Validation[String, AbstractBlockRandomization] = {
     database withSession {
       threadLocalSession withTransaction {
-        queryRandomizationMethodFromId(randomizationMethod.id).mutate { r =>
-          r.row = r.row.copy(_2 = generateBlob(randomizationMethod.random), _3 = randomizationMethod.getClass().getName())
+        queryRandomizationMethodFromId(randomizationMethod.id).mutate {
+          r =>
+            r.row = r.row.copy(_2 = generateBlob(randomizationMethod.random), _3 = randomizationMethod.getClass().getName())
         }
-        //update blocksize
-        queryBlockRandomizationFromId(randomizationMethod.id).mutate { r =>
-          r.row = r.row.copy(_4 = randomizationMethod.blocksize)
+        if (randomizationMethod.isInstanceOf[BlockRandomization]) {
+          //update blocksize
+          queryBlockRandomizationFromId(randomizationMethod.id).mutate {
+            r =>
+              r.row = r.row.copy(_4 = Some(randomizationMethod.asInstanceOf[BlockRandomization].blocksize))
+          }
+        } else if(randomizationMethod.isInstanceOf[VariableBlockRandomization]){
+          //update min, max and type
+          val variableBlock = randomizationMethod.asInstanceOf[VariableBlockRandomization]
+          queryBlockRandomizationFromId(randomizationMethod.id).mutate {
+            r =>
+              r.row = r.row.copy(_5 = Some(variableBlock.minBlockSize), _6 = Some(variableBlock.maxBlockSize), _7 =Some(variableBlock.variableBlockRandomizationType.toString))
+          }
         }
         updateBlocks(randomizationMethod)
       }
@@ -104,14 +122,16 @@ class BlockRandomizationDao(database: Database, driver: ExtendedProfile) extends
     }
   }
 
-  def delete(randomizationMethod: BlockRandomization) {
+  def delete(randomizationMethod: AbstractBlockRandomization) {
     database withSession {
-      queryBlockRandomizationFromId(randomizationMethod.id).mutate { r =>
-        r.delete()
+      queryBlockRandomizationFromId(randomizationMethod.id).mutate {
+        r =>
+          r.delete()
       }
 
-      queryRandomizationMethodFromId(randomizationMethod.id).mutate { r =>
-        r.delete()
+      queryRandomizationMethodFromId(randomizationMethod.id).mutate {
+        r =>
+          r.delete()
       }
 
     }
@@ -122,12 +142,12 @@ class BlockRandomizationDao(database: Database, driver: ExtendedProfile) extends
     database withSession {
       val resultList = queryBlockRandomizationFromId(id).list
       if (resultList.isEmpty) Failure("Block size not found")
-      else if (resultList.size == 1) Success(resultList(0)._4)
+      else if (resultList.size == 1) Success(resultList(0)._4.get)
       else Failure("More than one block size found")
     }
   }
 
-  private def getBlocks(blockRandomization: BlockRandomization) {
+  private def getBlocks(blockRandomization: AbstractBlockRandomization) {
     database withSession {
       for (block <- queryBlocksFromId(blockRandomization.id)) {
         if (blockRandomization.blocks.get(block._3).isEmpty) blockRandomization.blocks.put(block._3, new ListBuffer())
@@ -136,19 +156,20 @@ class BlockRandomizationDao(database: Database, driver: ExtendedProfile) extends
     }
   }
 
-  private def updateBlocks(randomizationMethod: BlockRandomization) {
+  private def updateBlocks(randomizationMethod: AbstractBlockRandomization) {
     deleteBlocks(randomizationMethod)
     saveBlocks(randomizationMethod)
   }
 
-  private def deleteBlocks(randomizationMethod: BlockRandomization) {
-    queryBlocksFromId(randomizationMethod.id).mutate { block =>
-      block.delete()
+  private def deleteBlocks(randomizationMethod: AbstractBlockRandomization) {
+    queryBlocksFromId(randomizationMethod.id).mutate {
+      block =>
+        block.delete()
     }
   }
 
-  private def saveBlocks(randomizationMethod: BlockRandomization) {
-    randomizationMethod.blocks.foreach(entry => entry._2.foreach(armId => Blocks.noId insert (randomizationMethod.id, armId, entry._1)))
+  private def saveBlocks(randomizationMethod: AbstractBlockRandomization) {
+    randomizationMethod.blocks.foreach(entry => entry._2.foreach(armId => Blocks.noId insert(randomizationMethod.id, armId, entry._1)))
   }
 
 }

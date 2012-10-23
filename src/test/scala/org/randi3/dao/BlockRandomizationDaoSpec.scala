@@ -13,13 +13,13 @@ import org.scalaquery.ql._
 import org.scalaquery.session.Database.threadLocalSession
 import org.scalaquery.session.Database
 
-import org.scalatest.matchers.MustMatchers
-import org.scalatest.Spec
+import org.scalatest.matchers.{ShouldMatchers, MustMatchers}
+import org.scalatest.FunSpec
 import org.specs.runner.JUnitSuiteRunner
 import org.randi3.model._
 
 @RunWith(classOf[JUnitSuiteRunner])
-class BlockRandomizationDaoSpec extends Spec with MustMatchers {
+class BlockRandomizationDaoSpec extends FunSpec with MustMatchers with ShouldMatchers {
   import org.randi3.utility.TestingEnvironment._
 
   describe("BlockRandomizationDao create method") {
@@ -36,7 +36,11 @@ class BlockRandomizationDaoSpec extends Spec with MustMatchers {
         val allBlockRandomizations = Query(BlockRandomizations).list
         allBlockRandomizations.size must be(1)
         allBlockRandomizations.head._3 must be(id)
-        allBlockRandomizations.head._4 must be(blockRandomization.blocksize)
+        allBlockRandomizations.head._4 must be(Some(blockRandomization.blocksize))
+        allBlockRandomizations.head._5 must   be(None)
+        allBlockRandomizations.head._6 must be(None)
+        allBlockRandomizations.head._7 must be(None)
+
       }
     }
 

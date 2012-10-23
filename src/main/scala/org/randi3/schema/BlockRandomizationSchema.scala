@@ -19,13 +19,16 @@ import org.randi3.schema.DatabaseSchema._
  */
 object BlockRandomizationSchema {
 
-  val BlockRandomizations = new Table[(Int, Int, Int, Int)]("BlockRandomization") {
+  val BlockRandomizations = new Table[(Int, Int, Int, Option[Int], Option[Int], Option[Int], Option[String])]("BlockRandomization") {
     def id = column[Int]("ID", O PrimaryKey, O AutoInc)
     def version = column[Int]("Version", O NotNull)
     def randomizationMethodId = column[Int]("RandomizationMethodId")
-    def blocksize = column[Int]("Blocksize")
-    def * = id ~ version ~ randomizationMethodId ~ blocksize
-    def noId = version ~ randomizationMethodId ~ blocksize
+    def blocksize = column[Option[Int]]("Blocksize", O Nullable)
+    def minBlockSize = column[Option[Int]]("MinBlocksize")
+    def maxBlockSize = column[Option[Int]]("MaxBlocksize")
+    def variableBlockType = column[Option[String]]("VariableBlockType")
+    def * = id ~ version ~ randomizationMethodId ~ blocksize ~ minBlockSize ~ maxBlockSize ~ variableBlockType
+    def noId = version ~ randomizationMethodId ~ blocksize ~ minBlockSize ~ maxBlockSize ~ variableBlockType
     def randomizationMethod = foreignKey("BlockRandomizationFK_RandomizationMethod", randomizationMethodId, RandomizationMethods)(_.id.get)
   }
 
