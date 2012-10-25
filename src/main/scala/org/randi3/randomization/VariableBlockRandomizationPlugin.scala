@@ -20,22 +20,30 @@ class VariableBlockRandomizationPlugin(database: Database, driver: ExtendedProfi
 
   val i18nName = name
 
-  val description = name
+  val description = "Block randomization algorithm with variable block size (either with multiple block sizes of the proportion of the treatment arms or absolute flexible block sizes)"
 
   val canBeUsedWithStratification = true
 
   private val blockRandomizationDao = new BlockRandomizationDao(database, driver)
 
+  private val minBlockSizeConfigurationType = new IntegerConfigurationType(name = "minimal block size", description = "minimal block size")
+  private val maxBlockSizeConfigurationType = new IntegerConfigurationType(name = "maximal block size", description = "maximal block size")
+
   def randomizationConfigurationOptions(): (List[ConfigurationType[Any]], List[Criterion[_ <: Any, Constraint[_ <: Any]]]) = {
-    (List(new IntegerConfigurationType(name="blocksize", description="blocksize")), Nil)
+    (List(
+      minBlockSizeConfigurationType,
+      maxBlockSizeConfigurationType
+    ), Nil)
   }
 
-  def getRandomizationConfigurations: List[ConfigurationProperty[Any]] = {
-    Nil
+  def getRandomizationConfigurations(id: Int): List[ConfigurationProperty[Any]] = {
+    val method = blockRandomizationDao.get(id).toOption.getOrElse(return Nil).getOrElse(return Nil)
+    List(new ConfigurationProperty[Any](minBlockSizeConfigurationType, method.asInstanceOf[VariableBlockRandomization].minBlockSize),
+      new ConfigurationProperty[Any](maxBlockSizeConfigurationType, method.asInstanceOf[VariableBlockRandomization].maxBlockSize))
   }
 
   def randomizationMethod(random: RandomGenerator, trial: Trial, configuration: List[ConfigurationProperty[Any]]): Validation[String, RandomizationMethod] = {
-    if(configuration.isEmpty) Failure("no configuration available")
+    if (configuration.isEmpty) Failure("no configuration available")
     else Success(new BlockRandomization(random = random, blocksize = configuration.head.value.asInstanceOf[Int]))
   }
 
@@ -51,7 +59,7 @@ class VariableBlockRandomizationPlugin(database: Database, driver: ExtendedProfi
     blockRandomizationDao.get(id)
   }
 
-  def getFromTrialId(trialId: Int): Validation[String, Option[RandomizationMethod]] = { 
+  def getFromTrialId(trialId: Int): Validation[String, Option[RandomizationMethod]] = {
     blockRandomizationDao.getFromTrialId(trialId)
   }
 

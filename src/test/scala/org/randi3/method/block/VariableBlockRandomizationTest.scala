@@ -2,25 +2,24 @@ package org.randi3.method.block
 
 import org.junit.runner.RunWith
 import org.scalatest.matchers.MustMatchers
-import org.scalatest.Spec
+import org.scalatest.FunSpec
 import org.specs.runner.JUnitSuiteRunner
-import org.randi3.randomization.BlockRandomization
-import org.apache.commons.math3.random.MersenneTwister
-import org.randi3.model._
 import collection.mutable.ListBuffer
-import org.randi3.model.criterion.{IntegerCriterion, OrdinalCriterion}
+import org.randi3.model._
+import org.randi3.utility.TestingEnvironment._
+import scala.Some
+import org.randi3.randomization.{VariableBlockRandomization, BlockRandomization}
+import org.apache.commons.math3.random.MersenneTwister
 import org.randi3.model.criterion.constraint.{IntegerConstraint, OrdinalConstraint}
-import collection.mutable
+import org.randi3.model.criterion.{IntegerCriterion, OrdinalCriterion}
 import scala.Some
 
 @RunWith(classOf[JUnitSuiteRunner])
-class BlockRandomizationTest extends Spec with MustMatchers {
+class VariableBlockRandomizationTest extends FunSpec with MustMatchers {
 
-  import org.randi3.utility.TestingEnvironment._
+  describe("A variable block randomization method with absolute type ") {
 
-  describe("A block randomization method") {
-
-    it("should be balanced after the end of each block") {
+    it("should be balanced with ...") {
 
       for (armCount <- 2 to 6) {
 
@@ -32,33 +31,21 @@ class BlockRandomizationTest extends Spec with MustMatchers {
             //create the arms
             for (i <- 1 to armCount) arms.append(createTreatmentArm.copy(id = i, plannedSize = 100))
 
-            val blockRandomizationMethod = new BlockRandomization(random = new MersenneTwister(), blocksize = blocksize)
+            val blockRandomizationMethod = new VariableBlockRandomization(random = new MersenneTwister(), minBlockSize = 4, maxBlockSize = blocksize)
             val trial = createTrial.copy(treatmentArms = arms.toList, randomizationMethod = Some(blockRandomizationMethod))
-
-
-            val necessaryChecks = trial.plannedSubjects / blocksize
-            10
-            var checks = 0
 
             for (i <- 1 to trial.plannedSubjects) {
               val subject = TrialSubject(identifier = "subject" + i, investigatorUserName = "investigator", trialSite = trial.participatingSites.head, properties = Nil).toOption.get
               trial.randomize(subject).isSuccess must be(true)
               trial.getSubjects.size must be(i)
-              if (i % blocksize == 0) {
-                checks = checks + 1
-                val comparisonSize = trial.treatmentArms.head.subjects.size
-                comparisonSize must be > 0
-                trial.treatmentArms.foreach(arm => arm.subjects.size must be(comparisonSize))
-              }
             }
-            necessaryChecks must be(checks)
           }
         }
       }
 
     }
 
-    it("should be balanced in a subgroup after the end of each block (property stratification)") {
+    it("should be balanced in a subgroup with ... (property stratification)") {
 
       for (armCount <- 2 to 6) {
 
@@ -70,7 +57,7 @@ class BlockRandomizationTest extends Spec with MustMatchers {
             //create the arms
             for (i <- 1 to armCount) arms.append(createTreatmentArm.copy(id = i, plannedSize = 300))
 
-            val blockRandomizationMethod = new BlockRandomization(random = new MersenneTwister(), blocksize = blocksize)
+            val blockRandomizationMethod = new VariableBlockRandomization(random = new MersenneTwister(), minBlockSize = 4, maxBlockSize = blocksize)
 
             val ordinalConstraints = List(
               OrdinalConstraint(id = 1, configurations = List(Some("a"))).toOption.get,
@@ -130,24 +117,14 @@ class BlockRandomizationTest extends Spec with MustMatchers {
               trial.randomize(subject).isSuccess must be(true)
 
               trial.getSubjects.size must be(i)
-              groupCounter.indices.foreach(index =>
-                if (groupCounter(index)._2 > 0 && groupCounter(index)._2 % blocksize == 0) {
-                  val comparisonSize = trial.treatmentArms.head.subjects.filter(subject => {
-                    subject.getStratum(StratifiedTrialSite.NO) == groupCounter(index)._1
-                  }).size
-                  comparisonSize must be > 0
-                  trial.treatmentArms.foreach(arm => arm.subjects.filter(subject => subject.getStratum(StratifiedTrialSite.NO) == groupCounter(index)._1).size must be(comparisonSize))
-                }
-              )
-
             }
-
+            //TODO TEST
           }
         }
       }
     }
 
-    it("should be balanced in a subgroup after the end of each block (trial site stratification)") {
+    it("should be balanced in a subgroup with ... (trial site stratification)") {
 
       for (armCount <- 2 to 6) {
 
@@ -160,10 +137,10 @@ class BlockRandomizationTest extends Spec with MustMatchers {
             //create the arms
             for (i <- 1 to armCount) arms.append(createTreatmentArm.copy(id = i, plannedSize = 300))
 
-            val blockRandomizationMethod = new BlockRandomization(random = new MersenneTwister(), blocksize = blocksize)
+            val blockRandomizationMethod = new VariableBlockRandomization(random = new MersenneTwister(), minBlockSize = 4, maxBlockSize = blocksize)
 
             val trialSites = List(createTrialSite.copy(id = 1), createTrialSite.copy(id = 2), createTrialSite.copy(id = 3))
-            10
+
             val trial = createTrial.copy(
               treatmentArms = arms.toList,
               randomizationMethod = Some(blockRandomizationMethod),
@@ -194,18 +171,8 @@ class BlockRandomizationTest extends Spec with MustMatchers {
 
               trial.randomize(subject).isSuccess must be(true)
               trial.getSubjects.size must be(i)
-              groupCounter.indices.foreach(index =>
-                if (groupCounter(index)._2 > 0 && groupCounter(index)._2 % blocksize == 0) {
-                  val comparisonSize = trial.treatmentArms.head.subjects.filter(subject => {
-                    subject.getStratum(StratifiedTrialSite.YES_CLOSED) == groupCounter(index)._1
-                  }).size
-                  comparisonSize must be > 0
-                  trial.treatmentArms.foreach(arm => arm.subjects.filter(subject => subject.getStratum(StratifiedTrialSite.YES_CLOSED) == groupCounter(index)._1).size must be(comparisonSize))
-                }
-              )
-
             }
-
+            //TODO TEST
           }
         }
       }
@@ -213,7 +180,7 @@ class BlockRandomizationTest extends Spec with MustMatchers {
 
 
 
-    it("should be balanced in a subgroup after the end of each block (property and trial site stratification)") {
+    it("should be balanced in a subgroup with ... (property and trial site stratification)") {
 
       for (armCount <- 2 to 6) {
         for (blocksize <- 4 to 20) {
@@ -223,7 +190,7 @@ class BlockRandomizationTest extends Spec with MustMatchers {
             //create the arms
             for (i <- 1 to armCount) arms.append(createTreatmentArm.copy(id = i, plannedSize = 300))
 
-            val blockRandomizationMethod = new BlockRandomization(random = new MersenneTwister(), blocksize = blocksize)
+            val blockRandomizationMethod = new VariableBlockRandomization(random = new MersenneTwister(), minBlockSize = 4, maxBlockSize = blocksize)
 
             val ordinalConstraints = List(
               OrdinalConstraint(id = 1, configurations = List(Some("a"))).toOption.get,
@@ -327,23 +294,14 @@ class BlockRandomizationTest extends Spec with MustMatchers {
               trial.randomize(subject).isSuccess must be(true)
 
               trial.getSubjects.size must be(i)
-              groupCounter.indices.foreach(index =>
-                if (groupCounter(index)._2 > 0 && groupCounter(index)._2 % blocksize == 0) {
-                  val comparisonSize = trial.treatmentArms.head.subjects.filter(subject => {
-                    subject.getStratum(StratifiedTrialSite.YES_CLOSED) == groupCounter(index)._1
-                  }).size
-                  comparisonSize must be > 0
-                  trial.treatmentArms.foreach(arm => arm.subjects.filter(subject => subject.getStratum(StratifiedTrialSite.YES_CLOSED) == groupCounter(index)._1).size must be(comparisonSize))
-                }
-              )
 
             }
+            //TODO TEST
 
           }
         }
       }
     }
-
-
   }
+
 }

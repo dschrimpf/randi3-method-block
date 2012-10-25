@@ -23,7 +23,7 @@ object TestingEnvironment extends RandomizationPluginManagerComponent with DaoCo
 
   try {
     ConfigurationSchema.createDatabase
-  }catch {
+  } catch {
     case e: Exception =>
   }
 
@@ -55,14 +55,15 @@ object TestingEnvironment extends RandomizationPluginManagerComponent with DaoCo
   lazy val securityUtility = new SecurityUtility {
 
     var user = User(Int.MinValue, 0, "validName", "validPassword", "valid@mail.de", "validFirst", "validLastName", "123456", TrialSite(Int.MinValue, 0, "validName", "validCountry", "validStreet", "validPostCode", "validCity", "validPassword").toOption.get, Set(), true, true, Locale.GERMAN).toOption.get
+
     def currentUser: Option[User] = Some(user)
   }
 
   lazy val utilityDB = new UtilityDB
   lazy val utilityMail = new UtilityMail
 
-  lazy val mailSender = new MailSender("localhost", "25", false, "username", "password", false, "mail@example.com"){
-    override def sendMessage(to: String, cc: String, bcc: String, subject: String, content: String) {  }
+  lazy val mailSender = new MailSender("localhost", "25", false, "username", "password", false, "mail@example.com") {
+    override def sendMessage(to: String, cc: String, bcc: String, subject: String, content: String) {}
   }
 
   lazy val trialSiteService = new TrialSiteService
@@ -108,7 +109,7 @@ object TestingEnvironment extends RandomizationPluginManagerComponent with DaoCo
   def randomMethod = randomizationPlugin.randomizationMethod(new MersenneTwister, null, Nil)
 
 
-  def createTrial = Trial(Int.MinValue, 0, trialName, trialAbbreviation, "description", new LocalDate(), (new LocalDate()).plusYears(5), StratifiedTrialSite.NO, TrialStatus.ACTIVE, createTreatmentArms(2), Nil, List(createTrialSiteDB),Some(randomMethod.toOption.get), Map(), TrialSubjectIdentificationCreationType.TRIAL_ARM_COUNTER).either match {
+  def createTrial = Trial(Int.MinValue, 0, trialName, trialAbbreviation, "description", new LocalDate(), (new LocalDate()).plusYears(5), StratifiedTrialSite.NO, TrialStatus.ACTIVE, createTreatmentArms(2), Nil, List(createTrialSiteDB), Some(randomMethod.toOption.get), Map(), TrialSubjectIdentificationCreationType.TRIAL_ARM_COUNTER).either match {
     case Left(x) => throw new RuntimeException(x.toString())
     case Right(x) => x
   }

@@ -1,4 +1,5 @@
 package org.randi3.method.block
+
 import java.util.Date
 import org.apache.commons.math3.random.MersenneTwister
 
@@ -20,6 +21,7 @@ import org.randi3.model._
 
 @RunWith(classOf[JUnitSuiteRunner])
 class BlockRandomizationDaoSpec extends FunSpec with MustMatchers with ShouldMatchers {
+
   import org.randi3.utility.TestingEnvironment._
 
   describe("BlockRandomizationDao create method") {
@@ -37,9 +39,8 @@ class BlockRandomizationDaoSpec extends FunSpec with MustMatchers with ShouldMat
         allBlockRandomizations.size must be(1)
         allBlockRandomizations.head._3 must be(id)
         allBlockRandomizations.head._4 must be(Some(blockRandomization.blocksize))
-        allBlockRandomizations.head._5 must   be(None)
+        allBlockRandomizations.head._5 must be(None)
         allBlockRandomizations.head._6 must be(None)
-        allBlockRandomizations.head._7 must be(None)
 
       }
     }

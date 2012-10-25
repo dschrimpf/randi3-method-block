@@ -20,7 +20,7 @@ class BlockRandomizationDao(database: Database, driver: ExtendedProfile) extends
   private val queryBlockRandomizationFromId = for {
     id <- Parameters[Int]
     blockRandomization <- BlockRandomizations if blockRandomization.randomizationMethodId is id
-  } yield blockRandomization.id ~ blockRandomization.version ~ blockRandomization.randomizationMethodId ~ blockRandomization.blocksize ~ blockRandomization.minBlockSize ~ blockRandomization.maxBlockSize ~blockRandomization.variableBlockType
+  } yield blockRandomization.id ~ blockRandomization.version ~ blockRandomization.randomizationMethodId ~ blockRandomization.blocksize ~ blockRandomization.minBlockSize ~ blockRandomization.maxBlockSize
 
   private val queryBlocksFromId = for {
     id <- Parameters[Int]
@@ -37,10 +37,10 @@ class BlockRandomizationDao(database: Database, driver: ExtendedProfile) extends
             case Right(id1) => id1
           }
           if (randomizationMethod.isInstanceOf[BlockRandomization]) {
-            BlockRandomizations.noId insert(0, id, Some(randomizationMethod.asInstanceOf[BlockRandomization].blocksize), None, None, None)
-          }else  if (randomizationMethod.isInstanceOf[VariableBlockRandomization]) {
+            BlockRandomizations.noId insert(0, id, Some(randomizationMethod.asInstanceOf[BlockRandomization].blocksize), None, None)
+          } else if (randomizationMethod.isInstanceOf[VariableBlockRandomization]) {
             val method = randomizationMethod.asInstanceOf[VariableBlockRandomization]
-            BlockRandomizations.noId insert(0, id, None, Some(method.minBlockSize), Some(method.maxBlockSize), Some(method.variableBlockRandomizationType.toString))
+            BlockRandomizations.noId insert(0, id, None, Some(method.minBlockSize), Some(method.maxBlockSize))
           }
 
           id
@@ -63,6 +63,19 @@ class BlockRandomizationDao(database: Database, driver: ExtendedProfile) extends
           val blockRandomization = new BlockRandomization(rm._1.get, 0, deserializeRandomGenerator(rm._2.get), blockSize)
           getBlocks(blockRandomization)
           return Success(Some(blockRandomization))
+        } else if (rm._3 == classOf[VariableBlockRandomization].getName) {
+          val resultListBlock = queryBlockRandomizationFromId(rm._1.get).list
+          if (resultListBlock.isEmpty) return Failure("Plugin entry not found")
+          else if (resultListBlock.size > 1) return Failure("Database failure more than one entry")
+          else {
+            val minBlockSize = resultListBlock.head._5.getOrElse(return Failure("Minimal block size not found"))
+            val maxBlockSize = resultListBlock.head._6.getOrElse(return Failure("Maximal block size not found"))
+
+            val blockRandomization = new VariableBlockRandomization(rm._1.get, resultListBlock.head._2, deserializeRandomGenerator(rm._2.get), minBlockSize, maxBlockSize)
+            getBlocks(blockRandomization)
+            return Success(Some(blockRandomization))
+          }
+
         } else {
           Failure("Wrong plugin")
         }
@@ -84,12 +97,26 @@ class BlockRandomizationDao(database: Database, driver: ExtendedProfile) extends
           val blockRandomization = new BlockRandomization(rm._1.get, 0, deserializeRandomGenerator(rm._3.get), blockSize)
           getBlocks(blockRandomization)
           return Success(Some(blockRandomization))
+        } else if (rm._4 == classOf[VariableBlockRandomization].getName) {
+          val resultListBlock = queryBlockRandomizationFromId(rm._1.get).list
+          if (resultListBlock.isEmpty) return Failure("Plugin entry not found")
+          else if (resultListBlock.size > 1) return Failure("Database failure more than one entry")
+          else {
+            val minBlockSize = resultListBlock.head._5.getOrElse(return Failure("Minimal block size not found"))
+            val maxBlockSize = resultListBlock.head._6.getOrElse(return Failure("Maximal block size not found"))
+
+            val blockRandomization = new VariableBlockRandomization(rm._1.get, resultListBlock.head._2, deserializeRandomGenerator(rm._3.get), minBlockSize, maxBlockSize)
+            getBlocks(blockRandomization)
+            return Success(Some(blockRandomization))
+          }
+
         } else {
           Failure("Wrong plugin")
         }
       } else Failure("Duplicated database entry")
     }
   }
+
 
   def update(randomizationMethod: AbstractBlockRandomization): Validation[String, AbstractBlockRandomization] = {
     database withSession {
@@ -104,12 +131,12 @@ class BlockRandomizationDao(database: Database, driver: ExtendedProfile) extends
             r =>
               r.row = r.row.copy(_4 = Some(randomizationMethod.asInstanceOf[BlockRandomization].blocksize))
           }
-        } else if(randomizationMethod.isInstanceOf[VariableBlockRandomization]){
+        } else if (randomizationMethod.isInstanceOf[VariableBlockRandomization]) {
           //update min, max and type
           val variableBlock = randomizationMethod.asInstanceOf[VariableBlockRandomization]
           queryBlockRandomizationFromId(randomizationMethod.id).mutate {
             r =>
-              r.row = r.row.copy(_5 = Some(variableBlock.minBlockSize), _6 = Some(variableBlock.maxBlockSize), _7 =Some(variableBlock.variableBlockRandomizationType.toString))
+              r.row = r.row.copy(_5 = Some(variableBlock.minBlockSize), _6 = Some(variableBlock.maxBlockSize))
           }
         }
         updateBlocks(randomizationMethod)
@@ -142,7 +169,7 @@ class BlockRandomizationDao(database: Database, driver: ExtendedProfile) extends
     database withSession {
       val resultList = queryBlockRandomizationFromId(id).list
       if (resultList.isEmpty) Failure("Block size not found")
-      else if (resultList.size == 1) Success(resultList(0)._4.get)
+      else if (resultList.size == 1) Success(resultList(0)._4.getOrElse(return Failure("Blocksize not set")))
       else Failure("More than one block size found")
     }
   }
