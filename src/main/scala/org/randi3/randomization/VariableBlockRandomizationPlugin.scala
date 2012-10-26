@@ -44,7 +44,11 @@ class VariableBlockRandomizationPlugin(database: Database, driver: ExtendedProfi
 
   def randomizationMethod(random: RandomGenerator, trial: Trial, configuration: List[ConfigurationProperty[Any]]): Validation[String, RandomizationMethod] = {
     if (configuration.isEmpty) Failure("no configuration available")
-    else Success(new BlockRandomization(random = random, blocksize = configuration.head.value.asInstanceOf[Int]))
+    else {
+      val minBlockSize = configuration.find(conf => conf.configurationType.name == minBlockSizeConfigurationType.name).getOrElse(return Failure("Min block size not found"))
+      val maxBlockSize = configuration.find(conf => conf.configurationType.name == maxBlockSizeConfigurationType.name).getOrElse(return Failure("Max block size not found"))
+      Success(new VariableBlockRandomization(random = random, minBlockSize = minBlockSize.value.asInstanceOf[Int], maxBlockSize = maxBlockSize.value.asInstanceOf[Int]))
+    }
   }
 
   def databaseTables(): Option[DDL] = {
@@ -52,7 +56,7 @@ class VariableBlockRandomizationPlugin(database: Database, driver: ExtendedProfi
   }
 
   def create(randomizationMethod: RandomizationMethod, trialId: Int): Validation[String, Int] = {
-    blockRandomizationDao.create(randomizationMethod.asInstanceOf[BlockRandomization], trialId)
+    blockRandomizationDao.create(randomizationMethod.asInstanceOf[VariableBlockRandomization], trialId)
   }
 
   def get(id: Int): Validation[String, Option[RandomizationMethod]] = {
@@ -64,11 +68,11 @@ class VariableBlockRandomizationPlugin(database: Database, driver: ExtendedProfi
   }
 
   def update(randomizationMethod: RandomizationMethod): Validation[String, RandomizationMethod] = {
-    blockRandomizationDao.update(randomizationMethod.asInstanceOf[BlockRandomization])
+    blockRandomizationDao.update(randomizationMethod.asInstanceOf[VariableBlockRandomization])
   }
 
   def delete(randomizationMethod: RandomizationMethod) {
-    blockRandomizationDao.delete(randomizationMethod.asInstanceOf[BlockRandomization])
+    blockRandomizationDao.delete(randomizationMethod.asInstanceOf[VariableBlockRandomization])
   }
 
 }
