@@ -18,14 +18,17 @@ import org.randi3.schema.DatabaseSchema._
  * H2 database. The example data comes from Oracle's JDBC tutorial at
  * http://download.oracle.com/javase/tutorial/jdbc/basics/tables.html.
  */
-object BlockRandomizationSchema {
+class BlockRandomizationSchema(driver: ExtendedProfile) {
+  import driver.Implicit._
 
-  val BlockRandomizations = new Table[(Int, Int, Int, Option[Int], Option[Int], Option[Int])]("BlockRandomization") {
+  val schema = new DatabaseSchema(driver)
+
+  object BlockRandomizations extends Table[(Int, Int, Option[Int], Option[Int], Option[Int], Option[Int])]("BlockRandomization") {
     def id = column[Int]("ID", O PrimaryKey, O AutoInc)
 
     def version = column[Int]("Version", O NotNull)
 
-    def randomizationMethodId = column[Int]("RandomizationMethodId")
+    def randomizationMethodId = column[Option[Int]]("RandomizationMethodId")
 
     def blocksize = column[Option[Int]]("Blocksize", O Nullable)
 
@@ -37,13 +40,13 @@ object BlockRandomizationSchema {
 
     def noId = version ~ randomizationMethodId ~ blocksize ~ minBlockSize ~ maxBlockSize
 
-    def randomizationMethod = foreignKey("BlockRandomizationFK_RandomizationMethod", randomizationMethodId, RandomizationMethods)(_.id.get)
+    def randomizationMethod = foreignKey("BlockRandomizationFK_RandomizationMethod", randomizationMethodId, schema.RandomizationMethods)(_.id)
   }
 
-  val Blocks = new Table[(Int, Int, Int, String)]("Blocks") {
+  object Blocks extends Table[(Int, Option[Int], Int, String)]("Blocks") {
     def id = column[Int]("ID", O PrimaryKey, O AutoInc)
 
-    def randomizationMethodId = column[Int]("RandomizationMethodId")
+    def randomizationMethodId = column[Option[Int]]("RandomizationMethodId")
 
     def treatmentArmId = column[Int]("TreatmentArmId")
 
@@ -53,20 +56,17 @@ object BlockRandomizationSchema {
 
     def noId = randomizationMethodId ~ treatmentArmId ~ stratum
 
-    def randomizationMethod = foreignKey("BlockFK_RandomizationMethod", randomizationMethodId, RandomizationMethods)(_.id.get)
+    def randomizationMethod = foreignKey("BlockFK_RandomizationMethod", randomizationMethodId, schema.RandomizationMethods)(_.id)
 
-    def treatmentArm = foreignKey("BlockFK_TreatmentArm", treatmentArmId, TreatmentArms)(_.id)
+    def treatmentArm = foreignKey("BlockFK_TreatmentArm", treatmentArmId, schema.TreatmentArms)(_.id)
   }
 
-  def getDatabaseTables(driver: ExtendedProfile): DDL = {
-    import driver.Implicit._
+  def getDatabaseTables: DDL = {
     (BlockRandomizations.ddl ++ Blocks.ddl)
   }
 
-  def createBlockRandomizationDatabaseTables(database: Database, driver: ExtendedProfile) = {
-    import driver.Implicit._
-
-    database withSession {
+  def createBlockRandomizationDatabaseTables(database: Database) = {
+      database withSession {
       (BlockRandomizations.ddl ++ Blocks.ddl).create
     }
   }

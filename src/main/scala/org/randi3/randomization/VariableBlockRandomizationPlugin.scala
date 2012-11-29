@@ -11,10 +11,12 @@ import org.scalaquery.session.Database
 import scalaz._
 
 import org.apache.commons.math3.random._
-
-import org.randi3.schema.BlockRandomizationSchema._
+import org.randi3.schema.BlockRandomizationSchema
 
 class VariableBlockRandomizationPlugin(database: Database, driver: ExtendedProfile) extends RandomizationMethodPlugin(database, driver) {
+
+  val schema = new BlockRandomizationSchema(driver)
+  import schema._
 
   val name = classOf[VariableBlockRandomization].getName
 
@@ -47,12 +49,12 @@ class VariableBlockRandomizationPlugin(database: Database, driver: ExtendedProfi
     else {
       val minBlockSize = configuration.find(conf => conf.configurationType.name == minBlockSizeConfigurationType.name).getOrElse(return Failure("Min block size not found"))
       val maxBlockSize = configuration.find(conf => conf.configurationType.name == maxBlockSizeConfigurationType.name).getOrElse(return Failure("Max block size not found"))
-      Success(new VariableBlockRandomization(random = random, minBlockSize = minBlockSize.value.asInstanceOf[Int], maxBlockSize = maxBlockSize.value.asInstanceOf[Int]))
+      Success(new VariableBlockRandomization(minBlockSize = minBlockSize.value.asInstanceOf[Int], maxBlockSize = maxBlockSize.value.asInstanceOf[Int])(random = random))
     }
   }
 
   def databaseTables(): Option[DDL] = {
-    Some(getDatabaseTables(driver))
+    Some(getDatabaseTables)
   }
 
   def create(randomizationMethod: RandomizationMethod, trialId: Int): Validation[String, Int] = {

@@ -2,8 +2,7 @@ package org.randi3.method.block
 
 import org.junit.runner.RunWith
 import org.scalatest.matchers.MustMatchers
-import org.scalatest.Spec
-import org.specs.runner.JUnitSuiteRunner
+import org.scalatest.FunSpec
 import org.randi3.randomization.BlockRandomization
 import org.apache.commons.math3.random.MersenneTwister
 import org.randi3.model._
@@ -12,9 +11,10 @@ import org.randi3.model.criterion.{IntegerCriterion, OrdinalCriterion}
 import org.randi3.model.criterion.constraint.{IntegerConstraint, OrdinalConstraint}
 import collection.mutable
 import scala.Some
+import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitSuiteRunner])
-class BlockRandomizationTest extends Spec with MustMatchers {
+@RunWith(classOf[JUnitRunner])
+class BlockRandomizationTest extends FunSpec with MustMatchers {
 
   import org.randi3.utility.TestingEnvironment._
 
@@ -32,7 +32,7 @@ class BlockRandomizationTest extends Spec with MustMatchers {
             //create the arms
             for (i <- 1 to armCount) arms.append(createTreatmentArm.copy(id = i, plannedSize = 100))
 
-            val blockRandomizationMethod = new BlockRandomization(random = new MersenneTwister(), blocksize = blocksize)
+            val blockRandomizationMethod = new BlockRandomization(blocksize = blocksize)(random = new MersenneTwister())
             val trial = createTrial.copy(treatmentArms = arms.toList, randomizationMethod = Some(blockRandomizationMethod))
 
 
@@ -70,7 +70,7 @@ class BlockRandomizationTest extends Spec with MustMatchers {
             //create the arms
             for (i <- 1 to armCount) arms.append(createTreatmentArm.copy(id = i, plannedSize = 300))
 
-            val blockRandomizationMethod = new BlockRandomization(random = new MersenneTwister(), blocksize = blocksize)
+            val blockRandomizationMethod = new BlockRandomization(blocksize = blocksize)(random = new MersenneTwister())
 
             val ordinalConstraints = List(
               OrdinalConstraint(id = 1, configurations = List(Some("a"))).toOption.get,
@@ -160,7 +160,7 @@ class BlockRandomizationTest extends Spec with MustMatchers {
             //create the arms
             for (i <- 1 to armCount) arms.append(createTreatmentArm.copy(id = i, plannedSize = 300))
 
-            val blockRandomizationMethod = new BlockRandomization(random = new MersenneTwister(), blocksize = blocksize)
+            val blockRandomizationMethod = new BlockRandomization(blocksize = blocksize)(random = new MersenneTwister())
 
             val trialSites = List(createTrialSite.copy(id = 1), createTrialSite.copy(id = 2), createTrialSite.copy(id = 3))
             10
@@ -223,7 +223,7 @@ class BlockRandomizationTest extends Spec with MustMatchers {
             //create the arms
             for (i <- 1 to armCount) arms.append(createTreatmentArm.copy(id = i, plannedSize = 300))
 
-            val blockRandomizationMethod = new BlockRandomization(random = new MersenneTwister(), blocksize = blocksize)
+            val blockRandomizationMethod = new BlockRandomization(blocksize = blocksize)(random = new MersenneTwister())
 
             val ordinalConstraints = List(
               OrdinalConstraint(id = 1, configurations = List(Some("a"))).toOption.get,

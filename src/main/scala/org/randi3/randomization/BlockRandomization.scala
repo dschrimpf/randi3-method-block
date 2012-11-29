@@ -8,7 +8,7 @@ import scala.collection.mutable.ListBuffer
 
 import org.randi3.randomization.AbstractBlockRandomization._
 
-class BlockRandomization(val id: Int = Int.MinValue, val version: Int = 0, val random: RandomGenerator, val blocksize: Int) extends AbstractBlockRandomization {
+case class BlockRandomization(id: Int = Int.MinValue, version: Int = 0, blocksize: Int)(val random: RandomGenerator) extends AbstractBlockRandomization {
 
 
   override protected def generateBlock(trial: Trial, subject: TrialSubject) {

@@ -2,8 +2,6 @@ package org.randi3.utility
 
 import org.scalaquery.ql.extended.ExtendedProfile
 import org.scalaquery.session.Database
-import org.randi3.schema.DatabaseSchema._
-import org.randi3.schema.BlockRandomizationSchema._
 import org.apache.commons.math3.random.MersenneTwister
 import org.randi3.model._
 import scala.collection.mutable.ListBuffer
@@ -13,7 +11,8 @@ import org.randi3.dao._
 import org.joda.time.LocalDate
 import org.randi3.service.{TrialSiteServiceComponent, TrialServiceComponent, UserServiceComponent}
 import org.randi3.configuration.{ConfigurationValues, ConfigurationSchema, ConfigurationService}
-
+import org.randi3.schema.{BlockRandomizationSchema, DatabaseSchema}
+import DatabaseSchema._
 
 object TestingEnvironment extends RandomizationPluginManagerComponent with DaoComponent with AuditDaoComponent with CriterionDaoComponent with TreatmentArmDaoComponent with TrialSubjectDaoComponent with TrialSiteDaoComponent with TrialRightDaoComponent with TrialDaoComponent with UserDaoComponent with SecurityComponent with I18NComponent with RandomizationMethodDaoComponent with TrialSiteServiceComponent with UtilityDBComponent with UtilityMailComponent with MailSenderComponent with TrialServiceComponent with UserServiceComponent {
 
@@ -29,14 +28,17 @@ object TestingEnvironment extends RandomizationPluginManagerComponent with DaoCo
 
 
   val configurationService = new ConfigurationService
+  configurationService.saveConfigurationEntry(ConfigurationValues.PLUGIN_PATH.toString, "/home/schrimpf/tmp/randi3TMP/")
 
-  configurationService.saveConfigurationEntry(ConfigurationValues.PLUGIN_PATH.toString, "/home/schrimpf/Projekte/workspaceRANDI3/randi3/randi3-core/plugins/")
 
   val database = databaseTuple._1
 
   val driver = databaseTuple._2
 
-  createBlockRandomizationDatabaseTables(database, driver)
+  val schema = new DatabaseSchema(driver)
+  val schemaBlock = new BlockRandomizationSchema(driver)
+
+  schemaBlock.createBlockRandomizationDatabaseTables(database)
 
   lazy val blockRandomizationDao = new BlockRandomizationDao(database, driver)
 

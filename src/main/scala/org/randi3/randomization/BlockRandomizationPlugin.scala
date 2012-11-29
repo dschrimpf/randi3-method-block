@@ -1,8 +1,6 @@
 package org.randi3.randomization
 
 
-import org.randi3.randomization._
-import org.randi3.randomization.configuration.IntegerConfigurationType
 import org.randi3.randomization.configuration._
 import org.randi3.dao.BlockRandomizationDao
 import org.randi3.model._
@@ -15,9 +13,14 @@ import scalaz._
 
 import org.apache.commons.math3.random._
 
-import org.randi3.schema.BlockRandomizationSchema._
+import org.randi3.schema.BlockRandomizationSchema
 
 class BlockRandomizationPlugin(database: Database, driver: ExtendedProfile) extends RandomizationMethodPlugin(database, driver) {
+
+
+  val schema = new BlockRandomizationSchema(driver)
+  import schema._
+
 
   val name = classOf[BlockRandomization].getName
 
@@ -42,11 +45,11 @@ class BlockRandomizationPlugin(database: Database, driver: ExtendedProfile) exte
 
   def randomizationMethod(random: RandomGenerator, trial: Trial, configuration: List[ConfigurationProperty[Any]]): Validation[String, RandomizationMethod] = {
     if (configuration.isEmpty) Failure("No configuration available")
-    else Success(new BlockRandomization(random = random, blocksize = configuration.head.value.asInstanceOf[Int]))
+    else Success(new BlockRandomization(blocksize = configuration.head.value.asInstanceOf[Int])(random = random))
   }
 
   def databaseTables(): Option[DDL] = {
-    Some(getDatabaseTables(driver))
+    Some(getDatabaseTables)
   }
 
   def create(randomizationMethod: RandomizationMethod, trialId: Int): Validation[String, Int] = {

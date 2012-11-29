@@ -6,7 +6,7 @@ import collection.mutable.ListBuffer
 import org.randi3.randomization.AbstractBlockRandomization._
 
 
-class VariableBlockRandomization(val id: Int = Int.MinValue, val version: Int = 0, val random: RandomGenerator, val minBlockSize: Int, val maxBlockSize: Int) extends AbstractBlockRandomization {
+case class VariableBlockRandomization(id: Int = Int.MinValue, version: Int = 0, minBlockSize: Int, maxBlockSize: Int)(val random: RandomGenerator) extends AbstractBlockRandomization {
 
 
   override protected def generateBlock(trial: Trial, subject: TrialSubject) {
