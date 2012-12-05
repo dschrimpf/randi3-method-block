@@ -58,7 +58,7 @@ class VariableBlockRandomizationPlugin(database: Database, driver: ExtendedProfi
   }
 
   def updateDatabase() {
-    LiquibaseUtil.updateDatabase(database, "db/db.changelog-master-block.xml")
+    LiquibaseUtil.updateDatabase(database, "db/db.changelog-master-block.xml", this.getClass.getClassLoader)
   }
 
   def create(randomizationMethod: RandomizationMethod, trialId: Int): Validation[String, Int] = {

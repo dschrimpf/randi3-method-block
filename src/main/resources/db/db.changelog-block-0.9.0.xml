@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
     <changeSet author="dschrimpf" id="org.randi3.method.block-1">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="BlockRandomization"/>
+            </not>
+        </preConditions>
         <createTable tableName="BlockRandomization">
             <column autoIncrement="true" name="ID" type="INT">
                 <constraints nullable="false" primaryKey="true"/>
@@ -17,6 +22,11 @@
         </createTable>
     </changeSet>
     <changeSet author="dschrimpf" id="org.randi3.method.block-2">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="Blocks"/>
+            </not>
+        </preConditions>
         <createTable tableName="Blocks">
             <column autoIncrement="true" name="ID" type="INT">
                 <constraints nullable="false" primaryKey="true"/>
@@ -33,12 +43,27 @@
         </createTable>
     </changeSet>
     <changeSet author="dschrimpf" id="org.randi3.method.block-3">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="BlockRandomizationFK_RandomizationMethod"/>
+            </not>
+        </preConditions>
         <addForeignKeyConstraint baseColumnNames="RandomizationMethodId" baseTableName="BlockRandomization" constraintName="BlockRandomizationFK_RandomizationMethod" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="RandomizationMethod" referencesUniqueColumn="false"/>
     </changeSet>
     <changeSet author="dschrimpf" id="org.randi3.method.block-4">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="BlockFK_RandomizationMethod"/>
+            </not>
+        </preConditions>
         <addForeignKeyConstraint baseColumnNames="RandomizationMethodId" baseTableName="Blocks" constraintName="BlockFK_RandomizationMethod" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="RandomizationMethod" referencesUniqueColumn="false"/>
     </changeSet>
     <changeSet author="dschrimpf" id="org.randi3.method.block-5">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="BlockFK_TreatmentArm"/>
+            </not>
+        </preConditions>
         <addForeignKeyConstraint baseColumnNames="TreatmentArmId" baseTableName="Blocks" constraintName="BlockFK_TreatmentArm" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="TreatmentArms" referencesUniqueColumn="false"/>
     </changeSet>
     

@@ -42,7 +42,7 @@ object TestingEnvironment extends RandomizationPluginManagerComponent with DaoCo
 
   LiquibaseUtil.updateDatabase(database)
 
-  LiquibaseUtil.updateDatabase(database, "db/db.changelog-master-block.xml")
+  LiquibaseUtil.updateDatabase(database, "db/db.changelog-master-block.xml", this.getClass.getClassLoader)
 
 
   lazy val blockRandomizationDao = new BlockRandomizationDao(database, driver)
