@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+    <changeSet author="dschrimpf" id="org.randi3.method.block-1">
+        <createTable tableName="BlockRandomization">
+            <column autoIncrement="true" name="ID" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="Version" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="RandomizationMethodId" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="Blocksize" type="INT"/>
+            <column name="MinBlocksize" type="INT"/>
+            <column name="MaxBlocksize" type="INT"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="dschrimpf" id="org.randi3.method.block-2">
+        <createTable tableName="Blocks">
+            <column autoIncrement="true" name="ID" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="RandomizationMethodId" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="TreatmentArmId" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="Stratum" type="VARCHAR(254)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="dschrimpf" id="org.randi3.method.block-3">
+        <addForeignKeyConstraint baseColumnNames="RandomizationMethodId" baseTableName="BlockRandomization" constraintName="BlockRandomizationFK_RandomizationMethod" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="RandomizationMethod" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="dschrimpf" id="org.randi3.method.block-4">
+        <addForeignKeyConstraint baseColumnNames="RandomizationMethodId" baseTableName="Blocks" constraintName="BlockFK_RandomizationMethod" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="RandomizationMethod" referencesUniqueColumn="false"/>
+    </changeSet>
+    <changeSet author="dschrimpf" id="org.randi3.method.block-5">
+        <addForeignKeyConstraint baseColumnNames="TreatmentArmId" baseTableName="Blocks" constraintName="BlockFK_TreatmentArm" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="ID" referencedTableName="TreatmentArms" referencesUniqueColumn="false"/>
+    </changeSet>
+    
+</databaseChangeLog>

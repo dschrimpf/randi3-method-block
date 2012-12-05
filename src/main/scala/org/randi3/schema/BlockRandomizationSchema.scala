@@ -65,10 +65,4 @@ class BlockRandomizationSchema(driver: ExtendedProfile) {
     (BlockRandomizations.ddl ++ Blocks.ddl)
   }
 
-  def createBlockRandomizationDatabaseTables(database: Database) = {
-      database withSession {
-      (BlockRandomizations.ddl ++ Blocks.ddl).create
-    }
-  }
-
 }

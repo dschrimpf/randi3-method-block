@@ -13,7 +13,7 @@ import scalaz._
 
 import org.apache.commons.math3.random._
 
-import org.randi3.schema.BlockRandomizationSchema
+import org.randi3.schema.{LiquibaseUtil, BlockRandomizationSchema}
 
 class BlockRandomizationPlugin(database: Database, driver: ExtendedProfile) extends RandomizationMethodPlugin(database, driver) {
 
@@ -50,6 +50,11 @@ class BlockRandomizationPlugin(database: Database, driver: ExtendedProfile) exte
 
   def databaseTables(): Option[DDL] = {
     Some(getDatabaseTables)
+  }
+
+  def updateDatabase() {
+    println("Update Block -------------------------------")
+    LiquibaseUtil.updateDatabase(database, "db/db.changelog-master-block.xml")
   }
 
   def create(randomizationMethod: RandomizationMethod, trialId: Int): Validation[String, Int] = {
