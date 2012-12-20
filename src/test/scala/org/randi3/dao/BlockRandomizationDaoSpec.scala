@@ -3,9 +3,7 @@ package org.randi3.method.block
 import org.apache.commons.math3.random.MersenneTwister
 
 import org.junit.runner.RunWith
-import org.randi3.randomization.BlockRandomization
 
-import org.scalaquery.ql.extended.H2Driver.Implicit._
 import org.scalaquery.ql._
 import org.scalaquery.session.Database.threadLocalSession
 
@@ -13,7 +11,6 @@ import org.scalaquery.session.Database.threadLocalSession
 import org.scalatest.matchers.{ShouldMatchers, MustMatchers}
 import org.scalatest.FunSpec
 import org.scalatest.junit.JUnitRunner
-import org.randi3.utility.TestingEnvironment._
 import scala.Left
 import org.randi3.randomization.BlockRandomization
 import scala.Right
@@ -24,6 +21,8 @@ import scala.Some
 class BlockRandomizationDaoSpec extends FunSpec with MustMatchers with ShouldMatchers {
 
   import org.randi3.utility.TestingEnvironment._
+
+  import driver.Implicit._
 
   import schemaBlock._
 

@@ -14,6 +14,7 @@ import org.randi3.configuration.{ConfigurationServiceComponent, ConfigurationVal
 import org.randi3.schema.{LiquibaseUtil, BlockRandomizationSchema, DatabaseSchema}
 import DatabaseSchema._
 import org.scalaquery.session.Database
+import org.scalaquery.meta.MTable
 
 
 object TestingEnvironment extends RandomizationPluginManagerComponent with DaoComponent with AuditDaoComponent with CriterionDaoComponent with TreatmentArmDaoComponent with TrialSubjectDaoComponent with TrialSiteDaoComponent with TrialRightDaoComponent with TrialDaoComponent with UserDaoComponent with SecurityComponent with I18NComponent with RandomizationMethodDaoComponent with TrialSiteServiceComponent with UtilityDBComponent with UtilityMailComponent with MailSenderComponent with TrialServiceComponent with UserServiceComponent with ConfigurationServiceComponent{
@@ -30,7 +31,7 @@ object TestingEnvironment extends RandomizationPluginManagerComponent with DaoCo
 
 
   val configurationService = new ConfigurationService
-  configurationService.saveConfigurationEntry(ConfigurationValues.PLUGIN_PATH.toString, "/home/daniel/tmp/randi3TMP/")
+  configurationService.saveConfigurationEntry(ConfigurationValues.PLUGIN_PATH.toString, "/home/schrimpf/tmp/randi3TMP/")
 
 
   val database = databaseTuple._1
@@ -43,6 +44,10 @@ object TestingEnvironment extends RandomizationPluginManagerComponent with DaoCo
   LiquibaseUtil.updateDatabase(database)
 
   LiquibaseUtil.updateDatabase(database, "db/db.changelog-master-block.xml", this.getClass.getClassLoader)
+
+  val tables = MTable.getTables.list()(database.createSession());
+  println(tables)
+  val tableMap = tables.foreach(table => println(table.name))
 
 
   lazy val blockRandomizationDao = new BlockRandomizationDao(database, driver)
@@ -61,7 +66,7 @@ object TestingEnvironment extends RandomizationPluginManagerComponent with DaoCo
 
   lazy val securityUtility = new SecurityUtility {
 
-    var user = User(Int.MinValue, 0, "validName", "validPassword", "valid@mail.de", "validFirst", "validLastName", "123456", TrialSite(Int.MinValue, 0, "validName", "validCountry", "validStreet", "validPostCode", "validCity", "validPassword").toOption.get, Set(), true, true, Locale.GERMAN).toOption.get
+    var user = User(Int.MinValue, 0, "validName", "validPassword", "valid@mail.de", "validFirst", "validLastName", "123456", TrialSite(Int.MinValue, 0, "validName", "validCountry", "validStreet", "validPostCode", "validCity", "validPassword", true).toOption.get, Set(), true, true, Locale.GERMAN).toOption.get
 
     def currentUser: Option[User] = Some(user)
   }
@@ -101,7 +106,7 @@ object TestingEnvironment extends RandomizationPluginManagerComponent with DaoCo
 
   val randomizationPlugin = randomizationPluginManager.getPlugin("org.randi3.randomization.CompleteRandomization").get
 
-  def createTrialSite = TrialSite(Int.MinValue, 0, trialSiteName, country, street, postCode, city, password).toOption.get
+  def createTrialSite = TrialSite(Int.MinValue, 0, trialSiteName, country, street, postCode, city, password, true).toOption.get
 
   def createTreatmentArm = TreatmentArm(Int.MinValue, 0, treatmentArmName, "description", new ListBuffer[TrialSubject](), 100).toOption.get
 
