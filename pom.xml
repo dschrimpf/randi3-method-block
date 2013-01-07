@@ -5,10 +5,10 @@
     <parent>
         <groupId>org.randi3</groupId>
         <artifactId>randi3-methods</artifactId>
-        <version>0.9.1-SNAPSHOT</version>
+        <version>0.9.1</version>
     </parent>
     <artifactId>randi3-method-block</artifactId>
-    <version>0.9.1-SNAPSHOT</version>
+    <version>0.9.1</version>
     <name>RANDI2 - block randomization method</name>
     <description>Block randomization method</description>
     <url>http://randi2.org</url>
