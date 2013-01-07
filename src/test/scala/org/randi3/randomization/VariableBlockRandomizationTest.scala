@@ -1,12 +1,10 @@
-package org.randi3.method.block
+package org.randi3.randomization
 
 import org.junit.runner.RunWith
 import org.scalatest.matchers.MustMatchers
 import org.scalatest.FunSpec
 import collection.mutable.ListBuffer
 import org.randi3.model._
-import org.randi3.utility.TestingEnvironment._
-import org.randi3.randomization.VariableBlockRandomization
 import org.apache.commons.math3.random.MersenneTwister
 import org.randi3.model.criterion.constraint.{IntegerConstraint, OrdinalConstraint}
 import org.randi3.model.criterion.{IntegerCriterion, OrdinalCriterion}
@@ -15,6 +13,8 @@ import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class VariableBlockRandomizationTest extends FunSpec with MustMatchers {
+
+  import org.randi3.utility.TestingEnvironmentBlock._
 
   describe("A variable block randomization method with absolute type ") {
 

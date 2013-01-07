@@ -1,22 +1,22 @@
-package org.randi3.method.block
+package org.randi3.randomization
 
 import org.junit.runner.RunWith
 import org.scalatest.matchers.MustMatchers
 import org.scalatest.FunSpec
-import org.randi3.randomization.BlockRandomization
+
 import org.apache.commons.math3.random.MersenneTwister
 import org.randi3.model._
 import collection.mutable.ListBuffer
 import org.randi3.model.criterion.{IntegerCriterion, OrdinalCriterion}
 import org.randi3.model.criterion.constraint.{IntegerConstraint, OrdinalConstraint}
-import collection.mutable
+
 import scala.Some
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class BlockRandomizationTest extends FunSpec with MustMatchers {
 
-  import org.randi3.utility.TestingEnvironment._
+  import org.randi3.utility.TestingEnvironmentBlock._
 
   describe("A block randomization method") {
 
