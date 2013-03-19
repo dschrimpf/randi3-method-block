@@ -24,7 +24,7 @@ class BlockRandomizationSchema(driver: ExtendedProfile) {
   val schema = new DatabaseSchema(driver)
 
   object BlockRandomizations extends Table[(Int, Int, Option[Int], Option[Int], Option[Int], Option[Int])]("BlockRandomization") {
-    def id = column[Int]("ID", O PrimaryKey, O AutoInc)
+    def id = column[Int]("id", O PrimaryKey, O AutoInc)
 
     def version = column[Int]("Version", O NotNull)
 
@@ -44,7 +44,7 @@ class BlockRandomizationSchema(driver: ExtendedProfile) {
   }
 
   object Blocks extends Table[(Int, Option[Int], Int, String)]("Blocks") {
-    def id = column[Int]("ID", O PrimaryKey, O AutoInc)
+    def id = column[Int]("id", O PrimaryKey, O AutoInc)
 
     def randomizationMethodId = column[Option[Int]]("RandomizationMethodId")
 
