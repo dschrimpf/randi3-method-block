@@ -90,7 +90,7 @@ class BlockRandomizationTest extends FunSpec with MustMatchers {
             val trial = createTrial.copy(
               treatmentArms = arms.toList,
               randomizationMethod = Some(blockRandomizationMethod),
-              stratifyTrialSite = StratifiedTrialSite.NO,
+              isStratifiedByTrialSite = false,
               criterions = List(ordinalCriterion, integerCriterion))
 
 
@@ -133,10 +133,10 @@ class BlockRandomizationTest extends FunSpec with MustMatchers {
               groupCounter.indices.foreach(index =>
                 if (groupCounter(index)._2 > 0 && groupCounter(index)._2 % blocksize == 0) {
                   val comparisonSize = trial.treatmentArms.head.subjects.filter(subject => {
-                    subject.getStratum(StratifiedTrialSite.NO) == groupCounter(index)._1
+                    subject.getStratum(false) == groupCounter(index)._1
                   }).size
                   comparisonSize must be > 0
-                  trial.treatmentArms.foreach(arm => arm.subjects.filter(subject => subject.getStratum(StratifiedTrialSite.NO) == groupCounter(index)._1).size must be(comparisonSize))
+                  trial.treatmentArms.foreach(arm => arm.subjects.filter(subject => subject.getStratum(false) == groupCounter(index)._1).size must be(comparisonSize))
                 }
               )
 
@@ -167,7 +167,7 @@ class BlockRandomizationTest extends FunSpec with MustMatchers {
             val trial = createTrial.copy(
               treatmentArms = arms.toList,
               randomizationMethod = Some(blockRandomizationMethod),
-              stratifyTrialSite = StratifiedTrialSite.YES_CLOSED,
+              isStratifiedByTrialSite = true,
               participatingSites = trialSites,
               criterions = List())
 
@@ -197,10 +197,10 @@ class BlockRandomizationTest extends FunSpec with MustMatchers {
               groupCounter.indices.foreach(index =>
                 if (groupCounter(index)._2 > 0 && groupCounter(index)._2 % blocksize == 0) {
                   val comparisonSize = trial.treatmentArms.head.subjects.filter(subject => {
-                    subject.getStratum(StratifiedTrialSite.YES_CLOSED) == groupCounter(index)._1
+                    subject.getStratum(true) == groupCounter(index)._1
                   }).size
                   comparisonSize must be > 0
-                  trial.treatmentArms.foreach(arm => arm.subjects.filter(subject => subject.getStratum(StratifiedTrialSite.YES_CLOSED) == groupCounter(index)._1).size must be(comparisonSize))
+                  trial.treatmentArms.foreach(arm => arm.subjects.filter(subject => subject.getStratum(true) == groupCounter(index)._1).size must be(comparisonSize))
                 }
               )
 
@@ -245,7 +245,7 @@ class BlockRandomizationTest extends FunSpec with MustMatchers {
             val trial = createTrial.copy(
               treatmentArms = arms.toList,
               randomizationMethod = Some(blockRandomizationMethod),
-              stratifyTrialSite = StratifiedTrialSite.YES_CLOSED,
+              isStratifiedByTrialSite = true,
               participatingSites = trialSites,
               criterions = List(ordinalCriterion, integerCriterion))
 
@@ -330,10 +330,10 @@ class BlockRandomizationTest extends FunSpec with MustMatchers {
               groupCounter.indices.foreach(index =>
                 if (groupCounter(index)._2 > 0 && groupCounter(index)._2 % blocksize == 0) {
                   val comparisonSize = trial.treatmentArms.head.subjects.filter(subject => {
-                    subject.getStratum(StratifiedTrialSite.YES_CLOSED) == groupCounter(index)._1
+                    subject.getStratum(true) == groupCounter(index)._1
                   }).size
                   comparisonSize must be > 0
-                  trial.treatmentArms.foreach(arm => arm.subjects.filter(subject => subject.getStratum(StratifiedTrialSite.YES_CLOSED) == groupCounter(index)._1).size must be(comparisonSize))
+                  trial.treatmentArms.foreach(arm => arm.subjects.filter(subject => subject.getStratum(true) == groupCounter(index)._1).size must be(comparisonSize))
                 }
               )
 

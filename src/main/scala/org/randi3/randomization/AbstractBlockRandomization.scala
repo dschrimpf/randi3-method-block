@@ -27,7 +27,7 @@ abstract class AbstractBlockRandomization extends RandomizationMethod {
   }
 
   private def pullFromBlock(trial: Trial, subject: TrialSubject): TreatmentArm = {
-    val stratum = subject.getStratum(trial.stratifyTrialSite)
+    val stratum = subject.getStratum(trial.isStratifiedByTrialSite)
     val block = blocks.get(stratum).getOrElse {
       generateBlock(trial, subject)
       blocks.get(stratum).get

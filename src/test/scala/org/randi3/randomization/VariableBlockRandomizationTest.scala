@@ -76,7 +76,7 @@ class VariableBlockRandomizationTest extends FunSpec with MustMatchers {
             val trial = createTrial.copy(
               treatmentArms = arms.toList,
               randomizationMethod = Some(blockRandomizationMethod),
-              stratifyTrialSite = StratifiedTrialSite.NO,
+              isStratifiedByTrialSite = false,
               criterions = List(ordinalCriterion, integerCriterion))
 
 
@@ -143,7 +143,7 @@ class VariableBlockRandomizationTest extends FunSpec with MustMatchers {
             val trial = createTrial.copy(
               treatmentArms = arms.toList,
               randomizationMethod = Some(blockRandomizationMethod),
-              stratifyTrialSite = StratifiedTrialSite.YES_CLOSED,
+              isStratifiedByTrialSite = true,
               participatingSites = trialSites,
               criterions = List())
 
@@ -211,7 +211,7 @@ class VariableBlockRandomizationTest extends FunSpec with MustMatchers {
             val trial = createTrial.copy(
               treatmentArms = arms.toList,
               randomizationMethod = Some(blockRandomizationMethod),
-              stratifyTrialSite = StratifiedTrialSite.YES_CLOSED,
+              isStratifiedByTrialSite = true,
               participatingSites = trialSites,
               criterions = List(ordinalCriterion, integerCriterion))
 

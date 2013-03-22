@@ -12,7 +12,7 @@ case class BlockRandomization(id: Int = Int.MinValue, version: Int = 0, blocksiz
 
 
   override protected def generateBlock(trial: Trial, subject: TrialSubject) {
-    val stratum = subject.getStratum(trial.stratifyTrialSite)
+    val stratum = subject.getStratum(trial.isStratifiedByTrialSite)
     val block = blocks.get(stratum).getOrElse {
       blocks.put(stratum, new ListBuffer())
       blocks.get(stratum).get
