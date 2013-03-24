@@ -35,7 +35,9 @@ class BlockRandomizationDao(database: Database, driver: ExtendedProfile) extends
     database withSession {
       val identifier =
         threadLocalSession withTransaction {
-          RandomizationMethods.noId insert(trialId, generateBlob(randomizationMethod.random).get, randomizationMethod.getClass().getName())
+          val seed = randomizationMethod.random.nextLong()
+          randomizationMethod.random.setSeed(seed)
+          RandomizationMethods.noId insert(trialId, generateBlob(randomizationMethod.random).get, randomizationMethod.getClass().getName(), seed)
           val id = getId(trialId).either match {
             case Left(x) => return Failure(x)
             case Right(id1) => id1
