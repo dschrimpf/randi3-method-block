@@ -61,15 +61,15 @@ class BlockRandomizationDao(database: Database, driver: ExtendedProfile) extends
       if (resultList.isEmpty) Success(None)
       else if (resultList.size == 1) {
         val rm = resultList(0)
-        if (rm._3 == classOf[BlockRandomization].getName) {
+        if (rm._4 == classOf[BlockRandomization].getName) {
           val blockSize = getBlockSize(id).either match {
             case Left(x) => return Failure(x)
             case Right(blocksize) => blocksize
           }
-          val blockRandomization = new BlockRandomization(rm._1.get, 0, blockSize)(deserializeRandomGenerator(rm._2))
+          val blockRandomization = new BlockRandomization(rm._1.get, 0, blockSize)(deserializeRandomGenerator(rm._3))
           getBlocks(blockRandomization)
           return Success(Some(blockRandomization))
-        } else if (rm._3 == classOf[VariableBlockRandomization].getName) {
+        } else if (rm._4 == classOf[VariableBlockRandomization].getName) {
           val resultListBlock = queryBlockRandomizationFromId(rm._1.get).list
           if (resultListBlock.isEmpty) return Failure("Plugin entry not found")
           else if (resultListBlock.size > 1) return Failure("Database failure more than one entry")
@@ -77,7 +77,7 @@ class BlockRandomizationDao(database: Database, driver: ExtendedProfile) extends
             val minBlockSize = resultListBlock.head._5.getOrElse(return Failure("Minimal block size not found"))
             val maxBlockSize = resultListBlock.head._6.getOrElse(return Failure("Maximal block size not found"))
 
-            val blockRandomization = new VariableBlockRandomization(rm._1.get, resultListBlock.head._2, minBlockSize, maxBlockSize)(deserializeRandomGenerator(rm._2))
+            val blockRandomization = new VariableBlockRandomization(rm._1.get, resultListBlock.head._2, minBlockSize, maxBlockSize)(deserializeRandomGenerator(rm._3))
             getBlocks(blockRandomization)
             return Success(Some(blockRandomization))
           }
@@ -129,7 +129,7 @@ class BlockRandomizationDao(database: Database, driver: ExtendedProfile) extends
       threadLocalSession withTransaction {
         queryRandomizationMethodFromId(randomizationMethod.id).mutate {
           r =>
-            r.row = r.row.copy(_2 = generateBlob(randomizationMethod.random).get, _3 = randomizationMethod.getClass().getName())
+            r.row = r.row.copy(_3 = generateBlob(randomizationMethod.random).get, _4 = randomizationMethod.getClass().getName())
         }
         if (randomizationMethod.isInstanceOf[BlockRandomization]) {
           //update blocksize
