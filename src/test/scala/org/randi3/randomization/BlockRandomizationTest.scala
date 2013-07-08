@@ -37,7 +37,7 @@ class BlockRandomizationTest extends FunSpec with MustMatchers {
 
 
             val necessaryChecks = trial.plannedSubjects / blocksize
-            10
+
             var checks = 0
 
             for (i <- 1 to trial.plannedSubjects) {
@@ -163,7 +163,7 @@ class BlockRandomizationTest extends FunSpec with MustMatchers {
             val blockRandomizationMethod = new BlockRandomization(blocksize = blocksize)(random = new MersenneTwister())
 
             val trialSites = List(createTrialSite.copy(id = 1), createTrialSite.copy(id = 2), createTrialSite.copy(id = 3))
-            10
+
             val trial = createTrial.copy(
               treatmentArms = arms.toList,
               randomizationMethod = Some(blockRandomizationMethod),

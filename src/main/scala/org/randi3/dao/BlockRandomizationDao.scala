@@ -1,16 +1,17 @@
 package org.randi3.dao
 
 
-import org.scalaquery.session._
-import org.scalaquery.session.Database.threadLocalSession
-import org.scalaquery.ql._
-import org.scalaquery.ql.TypeMapper._
-import org.scalaquery.ql.extended.ExtendedProfile
+
+import scala.slick.session.Database.threadLocalSession
+
+import scala.slick.driver.ExtendedProfile
 
 import org.randi3.randomization.{VariableBlockRandomization, AbstractBlockRandomization, BlockRandomization}
 import scala.collection.mutable.ListBuffer
 import scalaz._
 import org.randi3.schema.{DatabaseSchema, BlockRandomizationSchema}
+import scala.slick.session.Database
+import scala.slick.lifted.Parameters
 
 class BlockRandomizationDao(database: Database, driver: ExtendedProfile) extends AbstractRandomizationMethodDao(database, driver) {
 
@@ -38,7 +39,7 @@ class BlockRandomizationDao(database: Database, driver: ExtendedProfile) extends
           val seed = randomizationMethod.random.nextLong()
           randomizationMethod.random.setSeed(seed)
           RandomizationMethods.noId insert(trialId, generateBlob(randomizationMethod.random).get, randomizationMethod.getClass().getName(), seed)
-          val id = getId(trialId).either match {
+          val id = getId(trialId).toEither match {
             case Left(x) => return Failure(x)
             case Right(id1) => id1
           }
@@ -62,7 +63,7 @@ class BlockRandomizationDao(database: Database, driver: ExtendedProfile) extends
       else if (resultList.size == 1) {
         val rm = resultList(0)
         if (rm._4 == classOf[BlockRandomization].getName) {
-          val blockSize = getBlockSize(id).either match {
+          val blockSize = getBlockSize(id).toEither match {
             case Left(x) => return Failure(x)
             case Right(blocksize) => blocksize
           }
@@ -96,7 +97,7 @@ class BlockRandomizationDao(database: Database, driver: ExtendedProfile) extends
       else if (resultList.size == 1) {
         val rm = resultList(0)
         if (rm._4 == classOf[BlockRandomization].getName) {
-          val blockSize = getBlockSize(rm._1.get).either match {
+          val blockSize = getBlockSize(rm._1.get).toEither match {
             case Left(x) => return Failure(x)
             case Right(blocksize) => blocksize
           }
@@ -148,7 +149,7 @@ class BlockRandomizationDao(database: Database, driver: ExtendedProfile) extends
         updateBlocks(randomizationMethod)
       }
     }
-    get(randomizationMethod.id).either match {
+    get(randomizationMethod.id).toEither match {
       case Left(x) => Failure(x)
       case Right(None) => Failure("Method not found")
       case Right(Some(blockRandomizationMethod)) => Success(blockRandomizationMethod)

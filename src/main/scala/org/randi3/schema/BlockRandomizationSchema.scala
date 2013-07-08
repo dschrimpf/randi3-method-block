@@ -1,27 +1,21 @@
 package org.randi3.schema
 
-import org.scalaquery.session._
-import org.scalaquery.session.Database.threadLocalSession
-import org.scalaquery.ql._
-import org.scalaquery.ql.TypeMapper._
-import org.scalaquery.ql.extended.{ExtendedTable => Table}
-import org.randi3.model._
-import org.scalaquery.ql.extended._
-import org.scalaquery.ql.basic._
-import java.sql.Blob
-import java.sql.Date
 
-import org.randi3.schema.DatabaseSchema._
+import scala.slick.driver.{BasicProfile, ExtendedProfile}
+import scala.slick.lifted.DDL
 
 /**
  * A simple example that uses statically typed queries against an in-memory
  * H2 database. The example data comes from Oracle's JDBC tutorial at
  * http://download.oracle.com/javase/tutorial/jdbc/basics/tables.html.
  */
-class BlockRandomizationSchema(driver: ExtendedProfile) {
+class BlockRandomizationSchema(val driver: ExtendedProfile) {
   import driver.Implicit._
 
+  import driver.simple._
+
   val schema = new DatabaseSchema(driver)
+  import schema._
 
   object BlockRandomizations extends Table[(Int, Int, Option[Int], Option[Int], Option[Int], Option[Int])]("BlockRandomization") {
     def id = column[Int]("id", O PrimaryKey, O AutoInc)
